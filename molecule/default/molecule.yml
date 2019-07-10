@@ -32,7 +32,8 @@ provisioner:
     host_vars:
       omero-server:
         omero_server_systemd_require_network: false
-
+      omero-database:
+        postgresql_version: "9.6"
 scenario:
   name: default
 verifier:
