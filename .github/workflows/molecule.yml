@@ -1,0 +1,39 @@
+---
+name: Molecule
+# yamllint disable-line rule:truthy
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  list-scenarios:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.listscenarios.outputs.scenarios }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: listscenarios
+        uses: manics/action-ansible-molecule-list-scenarios@main
+
+  test:
+    name: Test
+    needs:
+      - list-scenarios
+    runs-on: ubuntu-latest
+    strategy:
+      # Keep running so we can see if other tests pass
+      fail-fast: false
+      matrix:
+        scenario: ${{fromJson(needs.list-scenarios.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: "${{ github.repository }}"
+      - name: molecule
+        uses: manics/action-ome-molecule@master
+        with:
+          scenario: ${{ matrix.scenario }}
+
+# notifications:
+#   webhooks: https://galaxy.ansible.com/api/v1/notifications/
